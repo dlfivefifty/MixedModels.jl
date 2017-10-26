@@ -87,5 +87,6 @@ include("pls.jl")
 include("simulate.jl")
 include("PIRLS.jl")
 include("mixedmodel.jl")
+include("profile.jl")
 
 end # module

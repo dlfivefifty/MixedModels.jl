@@ -30,6 +30,12 @@ function reweight!(A::MatrixTerm{T}, sqrtwts::Vector{T}) where T
     A
 end
 
+function dropcolumn(A::MatrixTerm, i::Integer)
+    n, p = size(A)
+    inds = deleteat!(collect(1:p), i)
+    MatrixTerm(A.x[:, inds], A.cnames[inds])
+end
+
 eltype(A::MatrixTerm) = eltype(A.wtx)
 
 Base.size(A::MatrixTerm) = size(A.wtx)
