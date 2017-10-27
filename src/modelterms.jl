@@ -30,6 +30,8 @@ function reweight!(A::MatrixTerm{T}, sqrtwts::Vector{T}) where T
     A
 end
 
+Base.copy(A::MatrixTerm) = MatrixTerm(copy(A.x), copy(A.cnames))
+
 function dropcolumn(A::MatrixTerm, i::Integer)
     n, p = size(A)
     inds = deleteat!(collect(1:p), i)
@@ -106,16 +108,19 @@ function cond(A::ScalarFactorReTerm)
     iszero(Λ) ? oftype(Λ, Inf) : one(Λ)
 end
 
+function Base.copy(A::ScalarFactorReTerm)
+    z = copy(A.z)
+    ScalarFactorReTerm(copy(A.f), z, z, A.fnm, copy(A.cnms), A.Λ)
+end
+
 getΛ(A::ScalarFactorReTerm) = A.Λ
 
 function reweight!(A::ScalarFactorReTerm, sqrtwts::Vector)
-    n = length(sqrtwts)
-    if n > 0
+    if !isempty(sqrtwts)
         if A.z == A.wtz
-            A.wtz = A.z .* sqrtwts
-        else
-            A.wtz .= A.z .* sqrtwts
+            A.wtz = similar(A.z)
         end
+        A.wtz .= A.z .* sqrtwts
     end
     A
 end
@@ -174,6 +179,12 @@ function VectorFactorReTerm(f::PooledDataVector, z::Matrix, fnm, cnms, blks)
         offset += k
     end
     VectorFactorReTerm(f, z, z, fnm, cnms, blks, eye(eltype(z), n), inds)
+end
+
+function Base.copy(A::VectorFactorReTerm)
+    z = copy(A.z)
+    VectorFactorReTerm(copy(A.f), z, z, A.fnm, copy(A.cnms), 
+                       copy(A.blks), copy(A.Λ), copy(A.inds))
 end
 
 function reweight!(A::VectorFactorReTerm, sqrtwts::Vector)

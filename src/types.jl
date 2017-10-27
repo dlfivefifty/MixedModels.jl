@@ -109,6 +109,13 @@ function OptSummary(initial::Vector{T}, lowerbd::Vector{T},
         initial_step, -1, copy(initial), T(Inf), -1, optimizer, :FAILURE)
 end
 
+function Base.copy(s::OptSummary)
+    OptSummary(copy(s.initial), copy(s.lowerbd), s.finitial, s.ftol_rel,
+               s.ftol_abs, s.xtol_rel, copy(s.xtol_abs), copy(s.initial_step),
+               s.maxfeval, copy(s.final), s.fmin, s.feval, s.optimizer, s.returnvalue)
+end
+
+
 function Base.show(io::IO, s::OptSummary)
     println(io, "Initial parameter vector: ", s.initial)
     println(io, "Initial objective value:  ", s.finitial)
