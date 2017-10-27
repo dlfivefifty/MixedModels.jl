@@ -18,14 +18,14 @@ function densify(S::SparseMatrixCSC, threshold::Real = 0.3)
 end
 densify(A::AbstractMatrix, threshold::Real = 0.3) = A
 
-function LinearMixedModel(f, trms, wts)
-    n = size(trms[1], 1)
-    T = eltype(trms[end])
-    sqrtwts = sqrt.(wts)
+"""
+    createAL(trms)
+
+Return `BlockMatrix` objects A and L derived from the `trms` vector.
+"""
+function createAL(trms)
+    T = eltype(trms[end])  
     sz = size.(trms, 2)
-    if !isempty(wts)
-        reweight!.(trms, Vector[sqrtwts])
-    end
     nt = length(trms)
     A = BlockArray(AbstractMatrix{T}, sz, sz)
     L = BlockArray(AbstractMatrix{T}, sz, sz)
@@ -49,8 +49,17 @@ function LinearMixedModel(f, trms, wts)
             end
         end
     end
+    A, L
+end
+
+function LinearMixedModel(f, trms, wts)
+    sqrtwts = sqrt.(wts)
+    if !isempty(wts)
+        reweight!.(trms, [sqrtwts])
+    end
+    A, L = createAL(trms)
     optsum = OptSummary(getθ(trms), lowerbd(trms), :LN_BOBYQA;
-        ftol_rel = convert(T, 1.0e-12), ftol_abs = convert(T, 1.0e-8))
+        ftol_rel = 1.0e-12, ftol_abs = 1.0e-8)
     fill!(optsum.xtol_abs, 1.0e-10)
     LinearMixedModel(f, trms, sqrtwts, A, LowerTriangular(L), optsum)
 end
