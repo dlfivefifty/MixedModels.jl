@@ -1,5 +1,3 @@
-__precompile__()
-
 module MixedModels
 
 using ArgCheck, BlockArrays, CategoricalArrays, DataFrames, Distributions, GLM, 
